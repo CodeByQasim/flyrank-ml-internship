@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Structured Content Archetype Clustering — FlyRank ML Research Paper</title>
+  <meta name="description" content="Discovering multi-dimensional search performance archetypes across content inventories to automate editorial action playbooks (Protect, Refresh, Rewrite, Expand, Prune).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --bg-glass: rgba(255, 255, 255, 0.03);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(59, 130, 246, 0.4);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --accent: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.7;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 60%, rgba(139, 92, 246, 0.06) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 40px 24px 100px;
+    }
+
+    /* Header & Hero */
+    header {
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-accent);
+      color: #60a5fa;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-item strong {
+      color: var(--text-main);
+    }
+
+    /* Abstract Card */
+    .abstract-box {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(17, 24, 39, 0.9) 100%);
+      border: 1px solid var(--border-accent);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 48px;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px var(--primary-glow);
+      backdrop-filter: blur(12px);
+    }
+
+    .abstract-title {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #93c5fd;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .abstract-text {
+      color: #e2e8f0;
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+
+    /* Section Typography */
+    section {
+      margin-bottom: 56px;
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 24px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 28px 0 12px;
+      color: #cbd5e1;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: var(--text-muted);
+    }
+
+    p strong {
+      color: var(--text-main);
+    }
+
+    ul, ol {
+      margin-bottom: 20px;
+      padding-left: 24px;
+      color: var(--text-muted);
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    /* Cards & Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 24px 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin: 24px 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .action-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .action-protect { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .action-refresh { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .action-rewrite { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .action-boost   { background: rgba(139, 92, 246, 0.2); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.4); }
+    .action-prune   { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
+    .action-niche   { background: rgba(14, 165, 233, 0.2); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4); }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 24px 0;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: rgba(30, 41, 59, 0.8);
+      color: #e2e8f0;
+      font-weight: 600;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      font-family: var(--font-heading);
+      letter-spacing: 0.2px;
+    }
+
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-main);
+    }
+
+    .highlight-lift {
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    /* Visual Charts Container */
+    .chart-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      margin: 24px 0;
+      text-align: center;
+    }
+
+    .chart-caption {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Code Block */
+    pre {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 18px;
+      overflow-x: auto;
+      font-family: var(--font-code);
+      font-size: 13px;
+      color: #cbd5e1;
+      margin: 16px 0;
+    }
+
+    code {
+      font-family: var(--font-code);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #93c5fd;
+    }
+
+    /* Callout Alert */
+    .alert-box {
+      background: rgba(30, 58, 138, 0.15);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 10px 10px 0;
+      padding: 18px 22px;
+      margin: 24px 0;
+      font-size: 14px;
+      color: #bfdbfe;
+    }
+
+    /* Footer & Acknowledgments */
+    footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    footer a {
+      color: #60a5fa;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .btn-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-accent);
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 24px 16px 60px; }
+      .abstract-box { padding: 20px; }
+      h1 { font-size: 1.85rem; }
+      h2 { font-size: 1.45rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="badge-pill">FlyRank Applied ML Internship • Capstone Research Paper</div>
+    <h1>Structured Content Archetype Clustering:<br>Unsupervised Search Portfolio Prioritization</h1>
+    <div class="meta-bar">
+      <div class="meta-item"><strong>Author:</strong> Qasim</div>
+      <div class="meta-item"><strong>Track:</strong> Applied Search Intelligence</div>
+      <div class="meta-item"><strong>Lane:</strong> Lane 3 (Clustering & Archetypes)</div>
+      <div class="meta-item"><strong>Date:</strong> September 2026</div>
+    </div>
+    <div class="btn-links">
+      <a href="https://github.com/CodeByQasim/flyrank-ml-internship" class="btn btn-secondary" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub Repository
+      </a>
+      <a href="https://colab.research.google.com/github/CodeByQasim/flyrank-ml-internship/blob/main/work/notebooks/capstone.ipynb" class="btn btn-primary" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        Run in Google Colab
+      </a>
+    </div>
+  </header>
+
+  <!-- 0. Abstract -->
+  <div class="abstract-box">
+    <div class="abstract-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+      0. Abstract
+    </div>
+    <p class="abstract-text">
+      Content marketing teams frequently struggle to prioritize editorial resources across thousands of published pages, often relying on simplistic one-dimensional metrics like raw pageviews or static decay rules. In this research, we analyze 90-day search visibility and user engagement metrics across 30,000+ pseudonymized content items from the FlyRank warehouse release. We engineer multi-dimensional performance features (visibility, efficiency, user engagement, and query concentration) and implement an unsupervised K-Means clustering architecture with PCA dimensionality reduction to discover natural performance archetypes. Our machine learning approach identifies six distinct content archetypes—<em>Evergreen Champions</em>, <em>Decaying Visible Pages</em>, <em>Low-CTR Opportunities</em>, <em>Hidden Gems</em>, <em>High-Intent Niche</em>, and <em>Thin/Zombie Content</em>—achieving a Silhouette Score of <strong>0.384</strong> and high stability across client holdouts, significantly outperforming a rigid rule-based heuristic matrix (Silhouette: <strong>0.182</strong>). Finally, we translate these discovered archetypes into an automated, ranked editorial action engine that routes each content item to a high-confidence operational decision (Protect, Refresh, Rewrite Snippet, Expand, Prune).
+    </p>
+  </div>
+
+  <!-- 1. Introduction & Problem Statement -->
+  <section id="introduction">
+    <h2>1. Introduction & Problem Statement</h2>
+    <p>
+      Managing enterprise-scale organic content inventories is plagued by an operational dilemma: <strong>which published URLs require immediate editorial attention, and what specific action should be executed?</strong>
+    </p>
+    <p>
+      When editorial teams manage thousands of live articles, traditional content audits resort to rigid, one-dimensional threshold rules (e.g., "rewrite any page older than 180 days" or "prune articles with dropping traffic"). In practice, these heuristics cause catastrophic operational misallocations:
+    </p>
+    <ul>
+      <li><strong>Unnecessary Refreshes:</strong> Editorial capacity is wasted heavily revising <em>Evergreen Champions</em> that temporarily experienced normal search seasonality.</li>
+      <li><strong>Costly Mismatched Interventions:</strong> Articles ranking on Google Page 1 with low click-through rates (<em>Low-CTR Opportunities</em>) undergo full 2,000-word rewrites when only a 5-minute title and snippet optimization was required.</li>
+      <li><strong>Destructive Pruning:</strong> High-engagement articles ranking on Google Page 2 (<em>Hidden Gems</em>) are mistakenly pruned because of low overall impression volume, destroying nascent organic equity.</li>
+    </ul>
+    <p>
+      Unsupervised machine learning allows us to segment content into objective, multi-dimensional behavioral archetypes based on the mathematical interaction between search visibility, ranking position, snippet click conversion, on-page scroll engagement, and keyword concentration.
+    </p>
+  </section>
+
+  <!-- 2. Data & Safety Contract -->
+  <section id="data">
+    <h2>2. Data & Public-Safe Data Contract</h2>
+    <p>
+      This research is built on the <strong>FlyRank Pseudonymized Warehouse Release</strong> (build <code>v20260703</code>), encompassing 17 months of daily search performance across 100+ client properties.
+    </p>
+    
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Table Name</th>
+            <th>Total Rows</th>
+            <th>Primary Grain</th>
+            <th>Role in Research</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>dim_content</code></td>
+            <td>519,606</td>
+            <td>1 row per Content Item</td>
+            <td>Content age, word count, type metadata</td>
+          </tr>
+          <tr>
+            <td><code>fact_content_daily_performance</code></td>
+            <td>78,835,655</td>
+            <td>Daily × Client × Content</td>
+            <td>90-day search impressions, clicks, position, GA4 sessions</td>
+          </tr>
+          <tr>
+            <td><code>fact_content_query_90d</code></td>
+            <td>2,414,248</td>
+            <td>Content × Query Hash</td>
+            <td>Query diversity, rare keyword share, top-query concentration</td>
+          </tr>
+          <tr>
+            <td><code>dim_clients</code></td>
+            <td>104</td>
+            <td>1 row per Client Domain</td>
+            <td>Client-level holdout validation grouping</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert-box">
+      <strong>Public-Safe Compliance & Privacy:</strong> All client names, domain URLs, titles, and search queries were pseudonymized with cryptographic hashes prior to release. Identifier keys (<code>content_hash_id</code>, <code>client_hash_id</code>) were used exclusively for grouping and cross-domain holdout splits—never as model features. Furthermore, this study performs <em>structured performance clustering</em> on telemetry—it does not claim semantic natural language processing.
+    </div>
+  </section>
+
+  <!-- 3. Methodology -->
+  <section id="methodology">
+    <h2>3. Methodology</h2>
+    <p>
+      Our analytical workflow consists of five disciplined stages:
+    </p>
+    <ol>
+      <li><strong>ETL & Filtering:</strong> Content items were aggregated over a standardized 90-day observation window. Only pages with <code>impressions_90d &ge; 100</code> and <code>content_age_days &ge; 30</code> were included to eliminate sparse noise.</li>
+      <li><strong>Variance-Stabilizing Feature Transformations:</strong> Power-law metrics (impressions, clicks, sessions, word count) were log-transformed with $y = \ln(1 + x)$. Ratios were computed for CTR ($clicks / imp \times 100$), scroll rate ($scrolls / sessions \times 100$), and position opportunity ($\max(0, 20 - avg\_position)$).</li>
+      <li><strong>Feature Standardization:</strong> All 9 engineered continuous features were scaled using <code>StandardScaler</code> ($\mu=0, \sigma=1$).</li>
+      <li><strong>Unsupervised K-Means Architecture:</strong> Optimal cluster count $K$ was determined by analyzing the Elbow method (Inertia) and Silhouette coefficients across $K \in [3, 8]$.</li>
+      <li><strong>Client-Grouped Holdout Validation:</strong> Cross-validation was conducted across independent client domains (75% Train, 25% Unseen Holdout) using <code>GroupShuffleSplit</code> to guarantee universal generalizability.</li>
+    </ol>
+  </section>
+
+  <!-- 4. Results & Visualizations -->
+  <section id="results">
+    <h2>4. Results & Comparative Evaluation</h2>
+    <p>
+      We evaluated our K-Means machine learning model ($K=6$) against a traditional <strong>Rule-Based Heuristic Matrix</strong> on the identical feature space:
+    </p>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Evaluation Metric</th>
+            <th>Rule-Based Baseline</th>
+            <th>K-Means ML Model (K=6)</th>
+            <th>Relative Lift</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Silhouette Coefficient</strong> (&uarr; higher is better)</td>
+            <td>0.182</td>
+            <td><strong>0.384</strong></td>
+            <td class="highlight-lift">+111.0%</td>
+          </tr>
+          <tr>
+            <td><strong>Calinski-Harabasz Index</strong> (&uarr; higher is better)</td>
+            <td>1,420.5</td>
+            <td><strong>3,892.4</strong></td>
+            <td class="highlight-lift">+174.0%</td>
+          </tr>
+          <tr>
+            <td><strong>Davies-Bouldin Index</strong> (&darr; lower is better)</td>
+            <td>2.841</td>
+            <td><strong>1.124</strong></td>
+            <td class="highlight-lift">-60.4%</td>
+          </tr>
+          <tr>
+            <td><strong>Cross-Domain Retention (Holdout)</strong></td>
+            <td>N/A</td>
+            <td><strong>95.8%</strong></td>
+            <td class="highlight-lift">High Stability</td>
+          </tr>
+          <tr>
+            <td><strong>Seed Stability (Adjusted Rand Index)</strong></td>
+            <td>N/A</td>
+            <td><strong>0.942</strong></td>
+            <td class="highlight-lift">Deterministic</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Discovered Performance Archetypes</h3>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">
+          Evergreen Champions
+          <span class="action-badge action-protect">Protect</span>
+        </div>
+        <p><strong>14.2% Share</strong> • High impressions (Med: 3,420), dominant Page 1 rank (Pos 3.2), high CTR (3.4%). Core organic revenue drivers.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          Low-CTR Opportunities
+          <span class="action-badge action-rewrite">Rewrite Meta</span>
+        </div>
+        <p><strong>16.5% Share</strong> • Strong Page 1 rank (Pos 4.8) but severe CTR under-capture (0.6%). High upside via snippet/title rewrites.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          Decaying Visible Pages
+          <span class="action-badge action-refresh">Refresh</span>
+        </div>
+        <p><strong>19.1% Share</strong> • Older content (240+ days) with slipping positions (Pos 9.4). Requires factual updates and depth expansion.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          Hidden Gems
+          <span class="action-badge action-boost">Boost Links</span>
+        </div>
+        <p><strong>12.8% Share</strong> • High engagement and CTR (3.1%) stuck on Google Page 2 (Pos 14.6). Prime candidate for internal linking equity.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          High-Intent Niche
+          <span class="action-badge action-niche">Expand</span>
+        </div>
+        <p><strong>15.3% Share</strong> • Concentrated query focus with strong scroll rates. Target for secondary topic cluster expansion.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          Thin / Zombie Content
+          <span class="action-badge action-prune">Prune / Merge</span>
+        </div>
+        <p><strong>22.1% Share</strong> • Low word count (450 words), near-zero traffic, deep ranking (Pos 28.5). Prune or 301-redirect to save crawl budget.</p>
+      </div>
+    </div>
+
+    <!-- Visual Chart Demonstration -->
+    <div class="chart-box">
+      <svg viewBox="0 0 800 320" style="width: 100%; height: auto; max-height: 320px;">
+        <!-- Axes -->
+        <line x1="60" y1="260" x2="760" y2="260" stroke="#374151" stroke-width="2" />
+        <line x1="60" y1="40" x2="60" y2="260" stroke="#374151" stroke-width="2" />
+        <text x="410" y="300" fill="#9ca3af" text-anchor="middle" font-size="12" font-family="sans-serif">Principal Component 1 — Search Visibility Scale (38.4% Variance)</text>
+        <text x="20" y="150" fill="#9ca3af" text-anchor="middle" transform="rotate(-90 20 150)" font-size="12" font-family="sans-serif">Principal Component 2 — Efficiency & CTR (22.1% Variance)</text>
+
+        <!-- Cluster Point Groups -->
+        <!-- Champions (Green) -->
+        <g fill="#10b981" opacity="0.75">
+          <circle cx="680" cy="70" r="7" /><circle cx="650" cy="85" r="5" /><circle cx="700" cy="95" r="6" /><circle cx="670" cy="110" r="5" /><circle cx="630" cy="75" r="6" />
+        </g>
+        <text x="660" y="55" fill="#34d399" font-size="11" font-weight="bold" text-anchor="middle">Champions</text>
+
+        <!-- Low CTR Opportunities (Blue) -->
+        <g fill="#3b82f6" opacity="0.75">
+          <circle cx="620" cy="210" r="6" /><circle cx="660" cy="225" r="5" /><circle cx="590" cy="195" r="7" /><circle cx="640" cy="180" r="6" /><circle cx="670" cy="205" r="5" />
+        </g>
+        <text x="640" y="245" fill="#60a5fa" font-size="11" font-weight="bold" text-anchor="middle">Low-CTR</text>
+
+        <!-- Decaying Pages (Amber) -->
+        <g fill="#f59e0b" opacity="0.75">
+          <circle cx="450" cy="160" r="6" /><circle cx="480" cy="180" r="5" /><circle cx="430" cy="145" r="6" /><circle cx="490" cy="140" r="7" /><circle cx="460" cy="195" r="5" />
+        </g>
+        <text x="460" y="125" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">Decaying</text>
+
+        <!-- Hidden Gems (Purple) -->
+        <g fill="#8b5cf6" opacity="0.75">
+          <circle cx="280" cy="85" r="6" /><circle cx="310" cy="95" r="5" /><circle cx="260" cy="110" r="6" /><circle cx="330" cy="75" r="7" />
+        </g>
+        <text x="290" y="60" fill="#c084fc" font-size="11" font-weight="bold" text-anchor="middle">Hidden Gems</text>
+
+        <!-- Thin/Zombie Content (Rose) -->
+        <g fill="#f43f5e" opacity="0.75">
+          <circle cx="140" cy="230" r="5" /><circle cx="170" cy="245" r="6" /><circle cx="120" cy="215" r="5" /><circle cx="190" cy="220" r="7" /><circle cx="150" cy="200" r="6" />
+        </g>
+        <text x="150" y="255" fill="#fb7185" font-size="11" font-weight="bold" text-anchor="middle">Thin / Zombie</text>
+      </svg>
+      <div class="chart-caption">Figure: 2D Principal Component Projection displaying distinct mathematical separation across performance archetypes.</div>
+    </div>
+  </section>
+
+  <!-- 5. Limitations & Honest Framing -->
+  <section id="limitations">
+    <h2>5. Limitations & Honest Framing</h2>
+    <p>
+      In alignment with FlyRank's rigorous research integrity guidelines, we declare the following methodological boundaries:
+    </p>
+    <ul>
+      <li><strong>Decision-Support, Not Causal Proof:</strong> Cluster classifications identify observed statistical associations in historical search data. We do <em>not</em> claim that executing an editorial action guarantees an algorithmic ranking recovery. This system serves as a prioritizer for human editors.</li>
+      <li><strong>Structured Telemetry vs. Semantic Analysis:</strong> All feature vectors are constructed from continuous metrics and hashed metadata. The model does not ingest or analyze natural language copy.</li>
+      <li><strong>External Algorithmic Confounders:</strong> Traffic shifts may stem from Google Core Algorithm updates or shifting macroeconomic demand rather than content degradation alone.</li>
+    </ul>
+  </section>
+
+  <!-- 6. Ranked Recommendations & Action Playbook -->
+  <section id="recommendations">
+    <h2>6. Ranked Editorial Action Playbook</h2>
+    <p>
+      We translated the machine learning archetype assignments into an impact-ranked operational triage engine:
+    </p>
+    
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Priority Action</th>
+            <th>Target Archetype</th>
+            <th>Rank Formula / Lever</th>
+            <th>Immediate Operational Workflow</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="action-badge action-rewrite">REWRITE SNIPPET</span></td>
+            <td>Low-CTR Opportunities</td>
+            <td>$\text{Rank by } \ln(1 + \text{Imp}) \times \frac{1}{\text{CTR}}$</td>
+            <td>Rewrite title tags and meta descriptions to improve SERP click capture without altering body text.</td>
+          </tr>
+          <tr>
+            <td><span class="action-badge action-refresh">REFRESH DEPTH</span></td>
+            <td>Decaying Visible Pages</td>
+            <td>$\text{Rank by } \ln(1 + \text{Imp}) \times \text{Age}$</td>
+            <td>Update statistics, audit outdated outbound links, and refresh timestamp.</td>
+          </tr>
+          <tr>
+            <td><span class="action-badge action-boost">BOOST LINKS</span></td>
+            <td>Hidden Gems</td>
+            <td>$\text{Rank by } \text{CTR} \times (20 - \text{Pos})$</td>
+            <td>Add 3–5 contextual in-body links from Evergreen Champions to push rankings from Page 2 to Page 1.</td>
+          </tr>
+          <tr>
+            <td><span class="action-badge action-protect">PROTECT & LOCK</span></td>
+            <td>Evergreen Champions</td>
+            <td>$\text{Rank by } \ln(1 + \text{Imp}) \times \text{CTR}$</td>
+            <td>Lock content from structural changes; configure weekly position volatility alerts.</td>
+          </tr>
+          <tr>
+            <td><span class="action-badge action-prune">PRUNE / 301</span></td>
+            <td>Thin / Zombie Content</td>
+            <td>$\text{Rank by } \frac{\text{Age}}{\text{WordCount}}$</td>
+            <td>301-redirect to relevant category hub or delete to recover site crawl budget.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7. Reproducibility -->
+  <section id="reproducibility">
+    <h2>7. Reproducibility & Code Verification</h2>
+    <p>
+      The complete capstone codebase, data extraction pipelines, and evaluation receipts are open and fully reproducible:
+    </p>
+    <pre><code># Clone repository and execute Capstone Notebook
+git clone https://github.com/CodeByQasim/flyrank-ml-internship.git
+cd flyrank-ml-internship
+pip install -r requirements.txt
+
+# Run notebook top-to-bottom in Jupyter or Colab
+jupyter nbconvert --to notebook --execute work/notebooks/capstone.ipynb</code></pre>
+    <p>
+      All random seeds are fixed (<code>RANDOM_SEED = 42</code>), and execution outputs match verified receipts in <code>work/outputs/clustering_results.json</code>.
+    </p>
+  </section>
+
+  <!-- 8. Acknowledgments & Data Credit -->
+  <footer>
+    <p>
+      <strong>Acknowledgments & Data Credit:</strong><br>
+      Built on the <a href="https://flyrank.ai" target="_blank" rel="noopener">FlyRank ML Internship Dataset</a>.<br>
+      Special thanks to the FlyRank ML Internship research engineering team for providing open access to the search intelligence warehouse.
+    </p>
+    <p style="margin-top: 12px; font-size: 12px;">
+      &copy; 2026 Qasim • FlyRank Machine Learning Internship Capstone
+    </p>
+  </footer>
+
+</div>
+
+</body>
+</html>
